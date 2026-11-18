@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Portal Supplier - WMS Warehouse</title>
+    <style>
+        :root { --bg:#f4f6f8; --card:#fff; --text:#1f2933; --muted:#667085; --line:#e4e7ec; --brand:#0b7285; --brand-d:#095c6b; --bad:#c92a2a; --ok:#2b8a3e; }
+        * { box-sizing: border-box; }
+        body { margin:0; background:var(--bg); color:var(--text); font:15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+        header { background:var(--brand); color:#fff; padding:14px 20px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+        header h1 { margin:0; font-size:18px; font-weight:600; }
+        header .who { display:flex; align-items:center; gap:12px; font-size:14px; }
+        main { max-width:960px; margin:24px auto; padding:0 16px; }
+        .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:20px; margin-bottom:18px; }
+        .card h2 { margin:0 0 4px; font-size:17px; }
+        .hint { color:var(--muted); font-size:13px; margin:0 0 14px; }
+        label { display:block; font-size:13px; color:var(--muted); margin-bottom:4px; }
+        input { width:100%; padding:9px 10px; border:1px solid #cbd2d9; border-radius:6px; font:inherit; background:#fff; }
+        input:focus { outline:2px solid #99d6e0; border-color:var(--brand); }
+        input[readonly] { background:#f1f3f5; color:var(--muted); }
+        .grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(210px, 1fr)); gap:14px; }
+        button { font:inherit; padding:9px 16px; border-radius:6px; border:1px solid #cbd2d9; background:#fff; cursor:pointer; }
+        button:hover { background:#f1f3f5; }
+        button.primary { background:var(--brand); border-color:var(--brand); color:#fff; }
+        button.primary:hover { background:var(--brand-d); }
+        button:disabled { opacity:.45; cursor:not-allowed; }
+        button.link { border:none; background:none; color:#fff; text-decoration:underline; padding:0; }
+        .bar { display:flex; gap:10px; justify-content:flex-end; margin-top:16px; flex-wrap:wrap; }
+        .wrap { overflow-x:auto; }
+        table { width:100%; border-collapse:collapse; min-width:640px; }
+        th { text-align:left; font-size:13px; color:var(--muted); font-weight:600; padding:8px 6px; border-bottom:1px solid var(--line); }
+        td { padding:6px; border-bottom:1px solid var(--line); vertical-align:middle; }
+        td input { padding:7px 8px; }
+        .badge { display:inline-block; font-size:12px; padding:2px 8px; border-radius:999px; background:#e6fcf5; color:var(--ok); white-space:nowrap; }
+        .msg { padding:10px 12px; border-radius:6px; margin-bottom:14px; font-size:14px; }
+        .msg.err { background:#fff5f5; color:var(--bad); border:1px solid #ffc9c9; }
+        .msg.ok { background:#ebfbee; color:var(--ok); border:1px solid #b2f2bb; }
+        #login { max-width:380px; margin:60px auto; }
+        .hidden { display:none !important; }
+        .empty { text-align:center; color:var(--muted); padding:18px; }
+    </style>
+</head>
+<body>
+<header>
+    <h1>Portal Supplier</h1>
+    <div class="who hidden" id="who"><span id="whoName"></span><button class="link" id="btnLogout">Keluar</button></div>
+</header>
+<main>
+    <!-- login -->
+    <section id="login" class="card hidden">
+        <h2>Masuk sebagai Supplier</h2>
+        <p class="hint">Gunakan akun yang diberikan oleh Admin WMS.</p>
+        <div id="loginMsg"></div>
+        <div style="margin-bottom:12px"><label for="u">Username</label><input id="u" autocomplete="username"></div>
+        <div style="margin-bottom:12px"><label for="p">Password</label><input id="p" type="password" autocomplete="current-password"></div>
+        <button class="primary" id="btnLogin" style="width:100%">Masuk</button>
+    </section>
+
+    <!-- halaman supplier -->
+    <section id="app" class="hidden">
+        <div id="appMsg"></div>
+        <div class="card">
+            <h2>Profil Supplier</h2>
+            <p class="hint">Nama supplier hanya dapat diubah oleh Admin WMS.</p>
+            <div class="grid">
+                <div><label>Nama</label><input id="f_name" readonly></div>
+                <div><label for="f_contact">Kontak</label><input id="f_contact"></div>
+                <div><label for="f_phone">Telepon</label><input id="f_phone"></div>
+                <div><label for="f_email">Email</label><input id="f_email"></div>
+                <div><label for="f_address">Alamat</label><input id="f_address"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Daftar Produk dan Harga</h2>
+            <p class="hint">Produk yang sudah didaftarkan Admin sebagai barang di gudang ditandai "Terdaftar di WMS": SKU-nya tidak dapat diubah dan produknya tidak dapat dihapus, tetapi nama, satuan, dan harga boleh diperbarui. Perubahan harga berlaku untuk Purchase Order berikutnya.</p>
+            <div class="wrap">
+                <table>
+                    <thead><tr><th style="width:150px">SKU</th><th>Nama Produk</th><th style="width:110px">Satuan</th><th style="width:170px">Harga (Rp)</th><th style="width:140px">Status</th><th style="width:60px"></th></tr></thead>
+                    <tbody id="rows"></tbody>
+                </table>
+            </div>
+            <div class="bar">
+                <button id="btnAdd">+ Tambah Produk</button>
+                <button class="primary" id="btnSave">Simpan Perubahan</button>
+            </div>
+        </div>
+    </section>
+</main>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+let rows = [];                 // {sku, name, unit, price, baru}
+let terdaftar = new Set();     // sku yang sudah menjadi barang di WMS
+
+function h(tag, attrs, ...children) {
+    const el = document.createElement(tag);
+    Object.entries(attrs || {}).forEach(([k, v]) => {
+        if (k === "class") el.className = v;
+        else if (k.startsWith("on")) el.addEventListener(k.slice(2), v);
+        else if (v === true) el.setAttribute(k, "");
+        else if (v !== false && v != null) el.setAttribute(k, v);
+    });
+    children.forEach(c => el.append(c));
+    return el;
+}
+
+async function api(method, url, body) {
+    const res = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: body ? JSON.stringify(body) : undefined });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) { const e = new Error(data.error || "Terjadi kesalahan"); e.status = res.status; throw e; }
+    return data;
+}
+
+function pesan(id, teks, jenis) {
+    const box = $(id);
+    box.replaceChildren();
+    if (teks) box.append(h("div", { class: "msg " + (jenis || "err") }, teks));
+}
+
+function tampil(mode) {
+    $("login").classList.toggle("hidden", mode !== "login");
+    $("app").classList.toggle("hidden", mode !== "app");
+    $("who").classList.toggle("hidden", mode !== "app");
+}
+
+function gambarBaris() {
+    const tb = $("rows");
+    tb.replaceChildren();
+    if (!rows.length) { tb.append(h("tr", {}, h("td", { colspan: "6", class: "empty" }, "Belum ada produk. Klik \"Tambah Produk\"."))); return; }
+    rows.forEach((r, i) => {
+        const dikunci = !r.baru && terdaftar.has(r.sku);
+        const sku = h("input", { value: r.sku, readonly: !r.baru, placeholder: "cth: ME-001", oninput: e => { r.sku = e.target.value.trim(); } });
+        const nama = h("input", { value: r.name, oninput: e => { r.name = e.target.value; } });
+        const unit = h("input", { value: r.unit, oninput: e => { r.unit = e.target.value; } });
+        const harga = h("input", { type: "number", min: "0", step: "1000", value: r.price, oninput: e => { r.price = e.target.value; } });
+        const hapus = h("button", { title: dikunci ? "Sudah terdaftar sebagai barang di WMS, tidak dapat dihapus" : "Hapus produk", disabled: dikunci,
+            onclick: () => { rows.splice(i, 1); gambarBaris(); } }, "Hapus");
+        tb.append(h("tr", {}, h("td", {}, sku), h("td", {}, nama), h("td", {}, unit), h("td", {}, harga),
+            h("td", {}, dikunci ? h("span", { class: "badge" }, "Terdaftar di WMS") : (r.baru ? "Baru" : "-")), h("td", {}, hapus)));
+    });
+}
+
+function isiHalaman(data) {
+    const s = data.supplier;
+    terdaftar = new Set(data.registered || []);
+    $("f_name").value = s.name;
+    $("f_contact").value = s.contact || "";
+    $("f_phone").value = s.phone || "";
+    $("f_email").value = s.email || "";
+    $("f_address").value = s.address || "";
+    $("whoName").textContent = s.name;
+    rows = (s.products || []).map(p => ({ sku: p.sku, name: p.name, unit: p.unit, price: p.price, baru: false }));
+    gambarBaris();
+}
+
+async function muat() {
+    const data = await api("GET", "/api/portal/supplier");
+    isiHalaman(data);
+    tampil("app");
+}
+
+async function simpan() {
+    pesan("appMsg", "");
+    for (const [i, r] of rows.entries()) {
+        if (!r.sku || !String(r.name).trim()) { pesan("appMsg", `Baris ${i + 1}: SKU dan nama produk wajib diisi`); return; }
+        if (r.price === "" || isNaN(Number(r.price)) || Number(r.price) < 0) { pesan("appMsg", `Produk ${r.sku}: harga harus berupa angka 0 atau lebih`); return; }
+    }
+    const body = {
+        contact: $("f_contact").value, phone: $("f_phone").value, email: $("f_email").value, address: $("f_address").value,
+        products: rows.map(r => ({ sku: r.sku, name: String(r.name).trim(), unit: String(r.unit).trim() || "pcs", price: Number(r.price) }))
+    };
+    try {
+        const res = await api("PUT", "/api/portal/supplier", body);
+        isiHalaman({ supplier: res.supplier, registered: [...terdaftar] });
+        pesan("appMsg", "Perubahan tersimpan. Harga baru berlaku untuk Purchase Order berikutnya.", "ok");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (e) { pesan("appMsg", e.message); }
+}
+
+async function masuk() {
+    pesan("loginMsg", "");
+    try {
+        const res = await api("POST", "/api/auth/login", { username: $("u").value, password: $("p").value });
+        if (res.user.role !== "supplier") {
+            await api("POST", "/api/auth/logout");
+            pesan("loginMsg", "Akun ini bukan akun supplier. Gunakan aplikasi WMS untuk akun Admin, Manager, atau Staff.");
+            return;
+        }
+        $("p").value = "";
+        await muat();
+    } catch (e) { pesan("loginMsg", e.message); }
+}
+
+$("btnLogin").addEventListener("click", masuk);
+$("p").addEventListener("keydown", e => { if (e.key === "Enter") masuk(); });
+$("btnAdd").addEventListener("click", () => { rows.push({ sku: "", name: "", unit: "pcs", price: 0, baru: true }); gambarBaris(); });
+$("btnSave").addEventListener("click", simpan);
+$("btnLogout").addEventListener("click", async () => { await api("POST", "/api/auth/logout").catch(() => {}); tampil("login"); });
+
+(async function init() {
+    try {
+        const me = await api("GET", "/api/auth/me");
+        if (me.user && me.user.role === "supplier") { await muat(); return; }
+    } catch (e) { /* belum login */ }
+    tampil("login");
+})();
+</script>
+</body>
+</html>

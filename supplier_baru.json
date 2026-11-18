@@ -1,0 +1,12 @@
+{
+  "name": "PT Mitra Elektronik",
+  "contact": "Dewi",
+  "phone": "081200000009",
+  "email": "sales@mitraelektronik.example",
+  "address": "Yogyakarta",
+  "products": [
+    { "sku": "ME-001", "name": "Printer Inkjet", "unit": "unit", "price": 1250000 },
+    { "sku": "ME-002", "name": "Kabel HDMI 2m", "unit": "pcs", "price": 45000 },
+    { "sku": "ME-003", "name": "Flashdisk 64GB", "unit": "pcs", "price": 85000 }
+  ]
+}
